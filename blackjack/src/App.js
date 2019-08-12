@@ -30,7 +30,62 @@ class App extends React.Component {
     this.generateCard = this.generateCard.bind(this)
     this.setUp = this.setUp.bind(this)
     this.dealCards = this.dealCards.bind(this)
+    this.generateCount = this.generateCount.bind(this)
+    this.playerHit = this.playerHit.bind(this)
+    this.playStand = this.playStand.bind(this)
+    this.checkBJ = this.checkBJ.bind(this)
   }
+
+  checkBJ(){
+    const newCash = this.state.cash + this.state.bet*1.5
+
+    if (this.state.dealer.count === 21 && this.state.player.count === 21) {
+      this.setState({
+        message: "you Draww",
+        betTemp:0
+      })
+      setTimeout(() => {
+        this.softReset()
+        this.hideLoad()
+      }, 1000)
+    }
+
+
+    if (this.state.dealer.count === 21){
+      this.setState({
+        message: "you LOSE ",
+        cash: newCash - this.state.bet,
+        betTemp:0
+      })
+      setTimeout(() => {
+        this.softReset()
+        this.hideLoad()
+      }, 1000)
+    }
+    if (this.state.player.count === 21) {
+      this.setState({
+        cash: newCash,
+        message: "Blackjack!!"
+      })
+
+      setTimeout(() => {
+        this.softReset()
+        this.hideLoad()
+      }, 2000)
+    }
+
+  }
+
+  generateCount(card) {
+    if (typeof card.number === 'number'){
+      return card.number
+    } else if (card.number === 'A') {
+      return 11
+    } else {
+      return 10
+    }
+  }
+  
 
   setUp() {
     
@@ -56,12 +111,13 @@ class App extends React.Component {
   dealCards(deck) {
     const playerCard1 = this.generateCard(deck);
     const dealerCard1 = this.generateCard(playerCard1.newDeck);
-    const playerCard2 = this.generateCard(dealerCard1.newDeck);    
-    const player = [playerCard1.randomCard, playerCard2.randomCard]
-    const dealer = [dealerCard1.randomCard,{}]
+    const playerCard2 = this.generateCard(dealerCard1.newDeck); 
+    const dealerCard2 = this.generateCard(playerCard2.newDeck)   
+    const player = {cards: [playerCard1.randomCard, playerCard2.randomCard], count: this.generateCount(playerCard1.randomCard) + this.generateCount(playerCard2.randomCard)}
+    const dealer = {cards: [dealerCard1.randomCard, dealerCard2.randomCard], count: this.generateCount(dealerCard1.randomCard) + this.generateCount(dealerCard2.randomCard)}
   
     
-    return {newDeck :playerCard2.newDeck, player, dealer}
+    return {newDeck :dealerCard2.newDeck, player, dealer}
   }
 
   generateDeck() {
@@ -84,33 +140,40 @@ class App extends React.Component {
   }
   
   componentWillMount() {
-    
     this.setUp();
-    this.hideLoad()
+    this.hideLoad();
+    
   }
 
   valChange(e){
-    
     this.setState({val:e.target.value});
   }
   reset(){
+    this.setUp();
+    this.hideLoad();
+  }
+  softReset(){
+    const deck = this.generateDeck()
+    
+    const {newDeck, player,dealer} = this.dealCards(deck)
+
     this.setState({
-      hand: "none",
+      deck: newDeck,
+      hand: "block",
       button: "block",
-      cash: 100,
       bet:0,
       betTemp: 0,
       message: "",
       val: "",
-      cards: []
+      player,
+      dealer
+      
     })
-
-    this.generateCard()
   }
-
   hideLoad() {
     this.setState({
-      hand: "none"
+      hand: "none",
+
     })
   }
 
@@ -120,11 +183,89 @@ class App extends React.Component {
         message: "nope nibba",
         bet: "0"
       })
+    } else if (this.state.bet === 0) {
+      alert("You gotta bet something")
     } else {
+     
       this.setState({
         hand:"block",
-        
+        betTemp: this.state.bet
+      
       })
+
+      this.checkBJ();
+    }
+    
+  }
+
+  playerHit() {
+    
+    if (this.state.betTemp === 0) {
+      alert("bet something first")
+    } else {
+      const cardo = this.generateCard(this.state.deck)
+      const newPlayer = this.state.player.cards
+    const newCash = this.state.cash
+    const beto = this.state.bet
+    newPlayer.push(cardo.randomCard)
+    this.state.player.count = this.state.player.count + this.generateCount(cardo.randomCard)
+    this.state.player.cards = newPlayer
+    
+      
+      if (this.state.player.count > 21) {
+        this.setState({
+          message: "you Busted",
+          cash: newCash - beto,
+          betTemp:0
+        })
+        setTimeout(() => {
+          this.softReset()
+          this.hideLoad()
+        }, 1000)
+      }
+      this.setState({
+        deck: cardo.newDeck
+      })
+
+    }
+
+    
+  }
+
+  playStand(){
+    if (this.state.dealer.count < 17) {
+      const cardo = this.generateCard(this.state.deck)
+      const newDealer = this.state.dealer.cards
+      newDealer.push(cardo.randomCard)
+      this.state.dealer.count = this.state.dealer.count + this.generateCount(cardo.randomCard)
+      this.state.dealer.cards = newDealer
+      this.setState({})
+      this.playStand()
+      
+    } else {
+      const beto = this.state.bet
+      const newCash = this.state.cash
+      if (this.state.player.count > this.state.dealer.count || this.state.dealer.count > 21) {
+        this.setState({
+          message: "you Winnn",
+          cash: newCash + beto,
+          betTemp:0
+        })
+        setTimeout(() => {
+          this.softReset()
+          this.hideLoad()
+        }, 1000)
+      } else {
+        this.setState({
+          message: "you LOSE ",
+          cash: newCash - beto,
+          betTemp:0
+        })
+        setTimeout(() => {
+          this.softReset()
+          this.hideLoad()
+        }, 1000)
+      }
     }
     
   }
@@ -182,6 +323,8 @@ class App extends React.Component {
     return (
       <div className="App">
       <button onClick = {this.reset}>New Game</button>
+      <button onClick = {this.playerHit}>Hit</button>
+      <button onClick = {this.playStand}>Stand</button>
        <button onClick = {this.start} style = {{display:this.state.button}}>Bet</button>
        <form>
               <input type="number" name="bet" placeholder = "" value={this.state.val} onChange={this.valChange} />
@@ -204,16 +347,16 @@ class App extends React.Component {
           
           
           <div class="boardMe" style = {{display:this.state.hand}}>
-          <div class = "words">YOUR HAND 
+          <div class = "words">YOUR HAND {"     "} {this.state.player.count}
           </div>
-              <div class="card-small">
-                <p>{this.state.player[0].number}</p>
-                <p>{this.state.player[0].suit}</p>
+              {this.state.player.cards.map((card)=>{
+                return <div class="card-small">
+                <p class="card-text">{card.number}</p>
+                <p class="card-img ">{card.suit}</p>
               </div>
-              <div class="card-small">
-                <p>{this.state.player[1].number}</p>
-                <p>{this.state.player[1].suit}</p>
-              </div>  
+
+              })}
+            
             
           </div>
 
@@ -223,16 +366,15 @@ class App extends React.Component {
           
           <div className = "boardYou" style = {{display:this.state.hand}}>
           <div class = "words2">
-              Dealer's hand
+              Dealer's hand 
           </div>
-            <div class="card-small">
-                <p class="card-text">{this.state.dealer[0].number}</p>
-                <p class="card-img ">{this.state.dealer[0].suit}</p>
+          {this.state.dealer.cards.map((card)=>{
+                return <div class="card-small">
+                <p class="card-text">{card.number}</p>
+                <p class="card-img ">{card.suit}</p>
               </div>
-              <div class="card-small" style = {{display:'none'}}>
-                <p class="card-text">{this.state.player[0].number}</p>
-                <p class="card-img ">{this.state.player[0].suit}</p>
-              </div>           
+
+              })}          
            </div>
            
         </div>
@@ -242,48 +384,6 @@ class App extends React.Component {
   }
 }
 
-// function App() {
-//   return (
-//     <div className="App">
-      
-//       <div class="main">
-//         <div class="table">
-          
-          
-//           <div class="boardMe">
-//           <div class = "words">YOUR HAND 
-//           </div>
-//             <div class="card-small">
-            
-//               <p class="card-text black">A</p>
-//               <p class="card-img black">&clubs;</p>
-//             </div>
-//             <div class="card-small">
-//               <p class="card-text black">10</p>
-//               <p class="card-img black">&spades;</p>
-//             </div>
-          
-            
-//           </div>
-          
-//           <div className = "boardYou">
-//           <div class = "words2">
-//               Dealer's hand
-//           </div>
-//             <div class="card-small">
-//                 <p class="card-text red">K</p>
-//                 <p class="card-img red">&hearts;</p>
-//               </div>
-//               <div class="card-small">
-//                 <p class="card-text red">Q</p>
-//                 <p class="card-img red">&diams;</p>
-//               </div>           
-//            </div>
-           
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
+
 
 export default App;
