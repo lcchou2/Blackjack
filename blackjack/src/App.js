@@ -19,11 +19,10 @@ class App extends React.Component {
       cards: []
       // cards:[{number:2,suit:2}, {number:2,suit:2}, {number:2,suit:2},{number:2,suit:2}]
     }
-    this.hideLoad = this.hideLoad.bind(this)
+    
     this.start = this.start.bind(this)
     this.bet5 = this.bet5.bind(this)
     this.bet10 = this.bet10.bind(this)
-    this.reset = this.reset.bind(this)
     this.bet20 = this.bet20.bind(this)
     this.valChange = this.valChange.bind(this)
     this.generateDeck = this.generateDeck.bind(this)
@@ -34,44 +33,104 @@ class App extends React.Component {
     this.playerHit = this.playerHit.bind(this)
     this.playStand = this.playStand.bind(this)
     this.checkBJ = this.checkBJ.bind(this)
+    this.win = this.win.bind(this)
+    this.lose = this.lose.bind(this)
+    this.bjwin = this.bjwin.bind(this)
+    this.draw = this.draw.bind(this)
+    this.double = this.double.bind(this)
+  }
+
+  double() {
+    this.setState({
+      bet: this.state.bet * 2
+    })
+    const cardo = this.generateCard(this.state.deck)
+    const newPlayer = this.state.player.cards
+  
+  newPlayer.push(cardo.randomCard)
+  
+  this.state.player.count = this.state.player.count + this.generateCount(cardo.randomCard)
+  this.state.player.cards = newPlayer
+  if (this.state.player.count > 21) {
+    this.setState({
+      message: "you LOSE ",
+      cash: this.state.cash - this.state.bet*2,
+      betTemp:0
+    })
+    setTimeout(() => {
+      this.softReset()
+     
+    }, 2000)
+  } else {
+    this.setState({
+      bet: this.state.bet * 2
+    })
+    this.playStand()
+  }
+
+  
+
+    
+  }
+  draw(){
+    this.setState({
+      message: "you Draww",
+      betTemp:0
+    })
+    setTimeout(() => {
+      this.softReset()
+    
+    }, 2000)
+  }
+
+  lose() {
+    this.setState({
+      message: "you LOSE ",
+      cash: this.state.cash - this.state.bet,
+      betTemp:0
+    })
+    setTimeout(() => {
+      this.softReset()
+     
+    }, 2000)
+  }
+
+  bjwin() {
+    const newCash = this.state.cash + this.state.bet*1.5
+    this.setState({
+      cash: newCash,
+      message: "Blackjack!!"
+    })
+
+    setTimeout(() => {
+      this.softReset()
+    
+    }, 2000)
+
+  }
+  win() {
+
+    this.setState({
+      message: "you Winnn",
+      cash: this.state.cash + this.state.bet,
+      betTemp:0
+    })
+    setTimeout(() => {
+      this.softReset()
+     
+    }, 2000)
   }
 
   checkBJ(){
-    const newCash = this.state.cash + this.state.bet*1.5
 
     if (this.state.dealer.count === 21 && this.state.player.count === 21) {
-      this.setState({
-        message: "you Draww",
-        betTemp:0
-      })
-      setTimeout(() => {
-        this.softReset()
-        this.hideLoad()
-      }, 1000)
+      this.draw()
     }
-
-
     if (this.state.dealer.count === 21){
-      this.setState({
-        message: "you LOSE ",
-        cash: newCash - this.state.bet,
-        betTemp:0
-      })
-      setTimeout(() => {
-        this.softReset()
-        this.hideLoad()
-      }, 1000)
+      this.lose()
     }
     if (this.state.player.count === 21) {
-      this.setState({
-        cash: newCash,
-        message: "Blackjack!!"
-      })
-
-      setTimeout(() => {
-        this.softReset()
-        this.hideLoad()
-      }, 2000)
+      this.bjwin()
     }
 
   }
@@ -95,7 +154,7 @@ class App extends React.Component {
 
     this.setState({
       deck: newDeck,
-      hand: "block",
+      hand: "none",
       button: "block",
       cash: 100,
       bet:0,
@@ -141,17 +200,14 @@ class App extends React.Component {
   
   componentWillMount() {
     this.setUp();
-    this.hideLoad();
-    
   }
 
   valChange(e){
-    this.setState({val:e.target.value});
+    
+    this.setState({val:parseInt(e.target.value)});
+    
   }
-  reset(){
-    this.setUp();
-    this.hideLoad();
-  }
+
   softReset(){
     const deck = this.generateDeck()
     
@@ -159,7 +215,7 @@ class App extends React.Component {
 
     this.setState({
       deck: newDeck,
-      hand: "block",
+      hand: "none",
       button: "block",
       bet:0,
       betTemp: 0,
@@ -170,23 +226,29 @@ class App extends React.Component {
       
     })
   }
-  hideLoad() {
-    this.setState({
-      hand: "none",
-
-    })
-  }
+  
 
   start() {
+    
     if (this.state.val > this.state.cash){
       this.setState({
         message: "nope nibba",
         bet: "0"
       })
-    } else if (this.state.bet === 0) {
+    } else if (this.state.bet === 0 && this.state.val === "") {
       alert("You gotta bet something")
-    } else {
-     
+    } else if (typeof this.state.val === 'number'){
+      
+      this.setState({
+        bet: this.state.val,
+        hand:"block",
+        betTemp: this.state.bet
+      
+      })
+
+      this.checkBJ();
+    }else {
+      
       this.setState({
         hand:"block",
         betTemp: this.state.bet
@@ -205,23 +267,15 @@ class App extends React.Component {
     } else {
       const cardo = this.generateCard(this.state.deck)
       const newPlayer = this.state.player.cards
-    const newCash = this.state.cash
-    const beto = this.state.bet
+    
     newPlayer.push(cardo.randomCard)
+    
     this.state.player.count = this.state.player.count + this.generateCount(cardo.randomCard)
     this.state.player.cards = newPlayer
     
       
       if (this.state.player.count > 21) {
-        this.setState({
-          message: "you Busted",
-          cash: newCash - beto,
-          betTemp:0
-        })
-        setTimeout(() => {
-          this.softReset()
-          this.hideLoad()
-        }, 1000)
+        this.lose()
       }
       this.setState({
         deck: cardo.newDeck
@@ -243,28 +297,11 @@ class App extends React.Component {
       this.playStand()
       
     } else {
-      const beto = this.state.bet
-      const newCash = this.state.cash
+     
       if (this.state.player.count > this.state.dealer.count || this.state.dealer.count > 21) {
-        this.setState({
-          message: "you Winnn",
-          cash: newCash + beto,
-          betTemp:0
-        })
-        setTimeout(() => {
-          this.softReset()
-          this.hideLoad()
-        }, 1000)
+        this.win()
       } else {
-        this.setState({
-          message: "you LOSE ",
-          cash: newCash - beto,
-          betTemp:0
-        })
-        setTimeout(() => {
-          this.softReset()
-          this.hideLoad()
-        }, 1000)
+        this.lose()
       }
     }
     
@@ -310,21 +347,13 @@ class App extends React.Component {
     
   }
 
-        
-
-
-  
-
-
-
- 
-
   render() {
     return (
       <div className="App">
-      <button onClick = {this.reset}>New Game</button>
+      <button onClick = {this.setUp}>New Game</button>
       <button onClick = {this.playerHit}>Hit</button>
       <button onClick = {this.playStand}>Stand</button>
+      <button onClick = {this.double}>Double</button>
        <button onClick = {this.start} style = {{display:this.state.button}}>Bet</button>
        <form>
               <input type="number" name="bet" placeholder = "" value={this.state.val} onChange={this.valChange} />
