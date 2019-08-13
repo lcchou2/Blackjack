@@ -17,9 +17,7 @@ class App extends React.Component {
       val: "",
       deck: [],
       cards: []
-      // cards:[{number:2,suit:2}, {number:2,suit:2}, {number:2,suit:2},{number:2,suit:2}]
     }
-    
     this.start = this.start.bind(this)
     this.bet5 = this.bet5.bind(this)
     this.bet10 = this.bet10.bind(this)
@@ -31,7 +29,6 @@ class App extends React.Component {
     this.dealCards = this.dealCards.bind(this)
     this.generateCount = this.generateCount.bind(this)
     this.playerHit = this.playerHit.bind(this)
-    // this.playStand = this.playStand.bind(this)
     this.checkBJ = this.checkBJ.bind(this)
     this.win = this.win.bind(this)
     this.lose = this.lose.bind(this)
@@ -42,29 +39,27 @@ class App extends React.Component {
     this.dealerHit = this.dealerHit.bind(this)
   }
   dealerHit() {
-    const dealo = this.state.dealer.count 
+    const dealo = this.state.dealer.count
     const counto = this.state.player.count
-    if (dealo < 17) {
+    if (dealo < 17 && counto <= 21) {
       const cardo = this.generateCard(this.state.deck)
       const newDealer = this.state.dealer.cards
+      newDealer.push(cardo.randomCard)
 
-    
-    newDealer.push(cardo.randomCard)
-
-    this.setState(prevState => {
-      let dealer = Object.assign({}, prevState.dealer);  // creating copy of state variable jasper
+      this.setState(prevState => {
+      let dealer = Object.assign({}, prevState.dealer);  // creating copy of state variable dealer
       dealer.count = dealo + this.generateCount(cardo.randomCard)
-      dealer.cards = newDealer                    // update the name property, assign a new value                 
-      return { dealer , deck:cardo.newDeck};                                 // return new object jasper object
-    },()=>{
+      dealer.cards = newDealer                    // update the count property, assign a new value                 
+      return { dealer , deck:cardo.newDeck};                                 // return new object dealer object
+        },()=>{
       this.checkCount()
       this.dealerHit()
-    })
-      
-
-    } else {
-     
-      if (counto > dealo || dealo > 21) {
+      })
+    } else {  
+      if (counto > 21) {
+        this.lose()
+      }
+      if ((counto > dealo && counto <= 21)|| (dealo > 21 && counto <= 21)) {
         this.win()
       } else if (counto === dealo){ 
         this.draw()
@@ -72,38 +67,12 @@ class App extends React.Component {
         this.lose()
       }
     }
-    
-     
   }
 
-  // playStand(){
-  //   if (this.state.dealer.count < 17) {
-  //     const cardo = this.generateCard(this.state.deck)
-  //     const newDealer = this.state.dealer.cards
-  //     newDealer.push(cardo.randomCard)
-  //     this.state.dealer.count = this.state.dealer.count + this.generateCount(cardo.randomCard)
-  //     this.state.dealer.cards = newDealer
-  //     this.setState({})
-  //     this.playStand()
-      
-  //   } else {
-     
-  //     if (this.state.player.count > this.state.dealer.count || this.state.dealer.count > 21) {
-  //       this.win()
-  //     } else if (this.state.player.count === this.state.dealer.count){ 
-  //       this.draw()
-  //     }else {
-  //       this.lose()
-  //     }
-  //   }
-    
-  // }
-
   checkCount() {
-    
-    
     const counto = this.state.player.count
     const dealo = this.state.dealer.count
+  
     if (counto > 21 ) {
       this.lose()
     } else if (dealo > 21) {
@@ -112,18 +81,18 @@ class App extends React.Component {
   }
 
   double() {
+    const counto = this.state.player.count
     this.playerHit()
-
-    if (this.state.betTemp !== 0) {
-      this.playStand()
-    } 
-    
+    if (counto <= 21) {
+      if (this.state.betTemp !== 0) {
+        this.setState({
+          bet: this.state.bet * 2
+        }, this.dealerHit)
+      }  
+    }
+   
   }
 
-  
-
-    
-  
   draw(){
     this.setState({
       message: "you Draww",
@@ -131,7 +100,6 @@ class App extends React.Component {
     })
     setTimeout(() => {
       this.softReset()
-    
     }, 2000)
   }
 
@@ -143,7 +111,6 @@ class App extends React.Component {
     })
     setTimeout(() => {
       this.softReset()
-     
     }, 2000)
   }
 
@@ -156,7 +123,6 @@ class App extends React.Component {
 
     setTimeout(() => {
       this.softReset()
-    
     }, 2000)
 
   }
@@ -169,7 +135,6 @@ class App extends React.Component {
     })
     setTimeout(() => {
       this.softReset()
-     
     }, 2000)
   }
 
@@ -196,12 +161,9 @@ class App extends React.Component {
       return 10
     }
   }
-  
 
   setUp() {
-    
     const deck = this.generateDeck()
-    
     const {newDeck, player,dealer} = this.dealCards(deck)
 
     this.setState({
@@ -226,8 +188,6 @@ class App extends React.Component {
     const dealerCard2 = this.generateCard(playerCard2.newDeck)   
     const player = {cards: [playerCard1.randomCard, playerCard2.randomCard], count: this.generateCount(playerCard1.randomCard) + this.generateCount(playerCard2.randomCard), altcount: ""}
     const dealer = {cards: [dealerCard1.randomCard, dealerCard2.randomCard], count: this.generateCount(dealerCard1.randomCard) + this.generateCount(dealerCard2.randomCard), altcount: ""}
-  
-    
     return {newDeck :dealerCard2.newDeck, player, dealer}
   }
 
@@ -249,20 +209,16 @@ class App extends React.Component {
     const randomCard = newDeck[randomNum]
     return {randomCard, newDeck}
   }
-  
   componentWillMount() {
     this.setUp();
   }
 
   valChange(e){
-    
     this.setState({val:parseInt(e.target.value)});
-    
   }
 
   softReset(){
     const deck = this.generateDeck()
-    
     const {newDeck, player,dealer} = this.dealCards(deck)
 
     this.setState({
@@ -275,57 +231,40 @@ class App extends React.Component {
       val: "",
       player,
       dealer
-      
     })
   }
-  
 
   start() {
-   
-    console.log(this.state.val)
-    
+
     if (this.state.val > this.state.cash){
       this.setState({
         message: "nope nibba",
         bet: "0"
       })
     }  else if (typeof this.state.val === 'number'){
-      console.log(this.state.betTemp)
       this.setState({
         bet: this.state.val,
         hand:"block",
         betTemp: this.state.val
-      
       }, this.checkBJ())
-
-      
     }else if (this.state.bet === 0 && this.state.val === "") {
       alert("You gotta bet something")
-    }
-    
-    else {
-      
+    }else {
       this.setState({
         hand:"block",
         betTemp: this.state.val
-      
       },this.checkBJ())
-
-      
-    }
-    
+    }  
   }
 
   playerHit() {
-  
     if (this.state.betTemp === 0) {
       alert("bet something first")
     } else {
       const cardo = this.generateCard(this.state.deck)
       const newPlayer = this.state.player.cards
       const counto = this.state.player.count
-    
-    newPlayer.push(cardo.randomCard)
+      newPlayer.push(cardo.randomCard)
 
     this.setState(prevState => {
       let player = Object.assign({}, prevState.player);  // creating copy of state variable jasper
@@ -334,34 +273,19 @@ class App extends React.Component {
       return { player , deck:cardo.newDeck, betTemp: this.state.bet};                                 // return new object jasper object
     },this.checkCount)
 
-    
-
-    // this.setState({
-    //   player:{count:counto + this.generateCount(cardo.randomCard), cards: newPlayer}
-    // })
-    
-    
-
     }
-
-    
   }
-
- 
-
 
   bet5(){
     if (this.state.bet >= this.state.cash) {
       this.setState({
         message: "You don't have that much money man"
       })
-      
     } else {
       this.setState({
         bet: this.state.bet + 5
       })
     }
-    
   }
 
   bet10(){
@@ -374,8 +298,8 @@ class App extends React.Component {
         bet: this.state.bet + 10
       })
     }
-    
   }
+
   bet20(){
     if (this.state.bet >= this.state.cash) {
       this.setState({
@@ -386,7 +310,6 @@ class App extends React.Component {
         bet: this.state.bet + 20
       })
     }
-    
   }
 
   render() {
@@ -403,11 +326,8 @@ class App extends React.Component {
        <button onClick = {this.bet5}>$5</button>
        <button onClick = {this.bet10}>$10</button>
        <button onClick = {this.bet20}>$20</button>
-       
        <div>
-         
             Cash: ${this.state.cash}
-            
         </div>
         <div>
         Current Bet: ${this.state.bet}
@@ -415,8 +335,6 @@ class App extends React.Component {
       <div className="main">
       {this.state.message}
         <div className="table">
-          
-          
           <div className="boardMe" style = {{display:this.state.hand}}>
           <div className = "words">YOUR HAND {"     "} {this.state.player.count}
           </div>
@@ -427,17 +345,10 @@ class App extends React.Component {
               </div>
 
               })}
-            
-            
           </div>
-
-         
-
-         
-          
           <div className = "boardYou" style = {{display:this.state.hand}}>
           <div className = "words2">
-              Dealer's hand 
+              Dealer's hand  {this.state.dealer.count}
           </div>
           {this.state.dealer.cards.map((card)=>{
                 return <div className="card-small">
@@ -454,7 +365,4 @@ class App extends React.Component {
     )
   }
 }
-
-
-
 export default App;
