@@ -126,10 +126,10 @@ class App extends React.Component {
     if (this.state.dealer.count === 21 && this.state.player.count === 21) {
       this.draw()
     }
-    if (this.state.dealer.count === 21){
+    if (this.state.dealer.count === 21 && this.state.player.count !== 21){
       this.lose()
     }
-    if (this.state.player.count === 21) {
+    if (this.state.player.count === 21 && this.state.dealer.count !== 21) {
       this.bjwin()
     }
 
@@ -300,7 +300,9 @@ class App extends React.Component {
      
       if (this.state.player.count > this.state.dealer.count || this.state.dealer.count > 21) {
         this.win()
-      } else {
+      } else if (this.state.player.count === this.state.dealer.count){ 
+        this.draw()
+      }else {
         this.lose()
       }
     }
