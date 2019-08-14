@@ -356,7 +356,7 @@ class App extends React.Component {
         countio = countio - 10
         
       }
-      console.log(cardo.randomCard.number)
+    
       
 
     this.setState(prevState => {
@@ -441,7 +441,10 @@ class App extends React.Component {
           </div>
           <div className = "boardYou" style = {{display:this.state.hand}}>
           <div className = "words2">
-              Dealer's hand  {this.state.dealer.count}
+              Dealer's hand  
+              <div style = {{display: this.state.dealerD}}>
+              {this.state.dealer.count}
+              </div>
           </div>
               <div style = {{display: this.state.dealerD1}} className="card-small">
                 <p  className="card-text">{this.state.dealer.cards[0].number}</p>
