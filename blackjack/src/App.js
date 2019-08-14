@@ -427,11 +427,12 @@ class App extends React.Component {
             Cash: ${this.state.cash}
         </div>
         <div>
-        Current Bet: ${this.state.bet}
+        Current Bet: ${this.state.bet} {"  "} {this.state.message}
         </div>
       <div className="main">
-      {this.state.message}
+      
         <div className="table">
+        <div className = 'boardTo'>
           <div className="boardMe" style = {{display:this.state.hand}}>
           <div className = "words">YOUR HAND {"     "} {this.state.player.count}
           </div>
@@ -481,7 +482,7 @@ class App extends React.Component {
 
               })}          
            </div>
-           
+           </div>
         </div>
       </div>
     </div>
