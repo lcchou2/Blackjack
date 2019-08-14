@@ -16,7 +16,9 @@ class App extends React.Component {
       message: "",
       val: "",
       deck: [],
-      cards: []
+      cards: [],
+      dealerD: 'none',
+      dealerD1: 'none'
     }
     this.start = this.start.bind(this)
     this.bet5 = this.bet5.bind(this)
@@ -75,14 +77,14 @@ class App extends React.Component {
       let dealer = Object.assign({}, prevState.dealer);  // creating copy of state variable dealer
       dealer.count = dealo + this.generateCount(cardo.randomCard)
       dealer.cards = newDealer                    // update the count property, assign a new value                 
-      return { dealer , deck:cardo.newDeck};                                 // return new object dealer object
+      return { dealer , deck:cardo.newDeck, dealerD: 'block', dealerD1: 'none'};                                 // return new object dealer object
         },()=>{
       this.checkCount()
       this.dealerHit()
       })
     } else {  
       if (counto > 21 && this.state.acePlayer === 0) {
-        console.log('here1')
+        
         this.lose()
         
       }
@@ -91,7 +93,7 @@ class App extends React.Component {
       } else if (counto === dealo){ 
         this.draw()
       }else {
-        console.log('here2')
+        
         this.lose()
         
         
@@ -112,11 +114,6 @@ class App extends React.Component {
   checkCount() {
     const counto = this.state.player.count
     const dealo = this.state.dealer.count
-    
-    
-   console.log(this.state)
-
-  
 
     // if (counto>21 && acesPlayer > 0) {
      
@@ -166,7 +163,9 @@ class App extends React.Component {
   draw(){
     this.setState({
       message: "you Draww",
-      betTemp:0
+      betTemp:0,
+      dealerD: 'block',
+      dealerD1: 'none'
     })
     setTimeout(() => {
       this.softReset()
@@ -177,7 +176,9 @@ class App extends React.Component {
     this.setState({
       message: "you LOSE ",
       cash: this.state.cash - this.state.bet,
-      betTemp:0
+      betTemp:0,
+      dealerD: 'block',
+      dealerD1: 'none'
     })
     setTimeout(() => {
       this.softReset()
@@ -188,7 +189,9 @@ class App extends React.Component {
     const newCash = this.state.cash + this.state.bet*1.5
     this.setState({
       cash: newCash,
-      message: "Blackjack!!"
+      message: "Blackjack!!",
+      dealerD: 'block',
+      dealerD1: 'none'
     })
 
     setTimeout(() => {
@@ -201,7 +204,9 @@ class App extends React.Component {
     this.setState({
       message: "you Winnn",
       cash: this.state.cash + this.state.bet,
-      betTemp:0
+      betTemp:0,
+      dealerD: 'block',
+      dealerD1: 'none'
     })
     setTimeout(() => {
       this.softReset()
@@ -306,7 +311,8 @@ class App extends React.Component {
       message: "",
       val: "",
       player,
-      dealer
+      dealer, 
+      dealerD: 'none'
     })
   }
 
@@ -321,14 +327,16 @@ class App extends React.Component {
       this.setState({
         bet: this.state.val,
         hand:"block",
-        betTemp: this.state.val
+        betTemp: this.state.val,
+        dealerD1: 'block'
       }, this.checkBJ())
     }else if (this.state.bet === 0 && this.state.val === "") {
       alert("You gotta bet something")
     }else {
       this.setState({
         hand:"block",
-        betTemp: this.state.val
+        betTemp: this.state.val,
+        dealerD1: 'block'
       },this.checkBJ())
     }  
 
@@ -434,9 +442,17 @@ class App extends React.Component {
           <div className = "words2">
               Dealer's hand  {this.state.dealer.count}
           </div>
+              <div style = {{display: this.state.dealerD1}} className="card-small">
+                <p  className="card-text">{this.state.dealer.cards[0].number}</p>
+                <p className="card-img ">{this.state.dealer.cards[0].suit}</p>
+              </div>
+              <div style = {{display: this.state.dealerD1}}className="card-small">
+                <p  className="card-text"></p>
+                <p className="card-img "></p>
+              </div>
           {this.state.dealer.cards.map((card)=>{
-                return <div className="card-small">
-                <p className="card-text">{card.number}</p>
+                return <div style = {{display:this.state.dealerD}} className="card-small">
+                <p  className="card-text">{card.number}</p>
                 <p className="card-img ">{card.suit}</p>
               </div>
 
