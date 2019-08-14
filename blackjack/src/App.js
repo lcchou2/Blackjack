@@ -38,34 +38,63 @@ class App extends React.Component {
     this.checkCount = this.checkCount.bind(this)
     this.dealerHit = this.dealerHit.bind(this)
     this.checkAce = this.checkAce.bind(this)
+    this.stupidAces = this.stupidAces.bind(this)
+  }
+
+  stupidAces(){
+    if (this.state.player.cards[0].number === 'A' && this.state.player.cards[1].number === 'A') {
+      this.setState(prevState => {
+        let player = Object.assign({}, prevState.player);  // creating copy of state variable dealer
+        player.count = 12
+                         // update the count property, assign a new value                 
+        return { player};                                 // return new object dealer object
+     })
+    } 
+
+    if (this.state.dealer.cards[0].number === 'A' && this.state.dealer.cards[1].number === 'A') {
+      this.setState(prevState => {
+        let dealer = Object.assign({}, prevState.player);  // creating copy of state variable dealer
+        dealer.count = 12
+                         // update the count property, assign a new value                 
+        return { dealer};                                 // return new object dealer object
+     })
+    }
   }
   dealerHit() {
     const dealo = this.state.dealer.count
-    const counto = this.state.player.count
+    let counto = this.state.player.count
     if (dealo < 17 && counto <= 21) {
       const cardo = this.generateCard(this.state.deck)
       const newDealer = this.state.dealer.cards
+      
       newDealer.push(cardo.randomCard)
-
+      if (cardo.number === 'A' && counto > 11) {
+        counto = counto - 10
+      }
       this.setState(prevState => {
       let dealer = Object.assign({}, prevState.dealer);  // creating copy of state variable dealer
       dealer.count = dealo + this.generateCount(cardo.randomCard)
       dealer.cards = newDealer                    // update the count property, assign a new value                 
-      return { dealer , deck:cardo.newDeck, aceDeal: this.checkAce(newDealer)};                                 // return new object dealer object
+      return { dealer , deck:cardo.newDeck};                                 // return new object dealer object
         },()=>{
       this.checkCount()
       this.dealerHit()
       })
     } else {  
-      if (counto > 21) {
+      if (counto > 21 && this.state.acePlayer === 0) {
+        console.log('here1')
         this.lose()
+        
       }
       if ((counto > dealo && counto <= 21)|| (dealo > 21 && counto <= 21)) {
         this.win()
       } else if (counto === dealo){ 
         this.draw()
       }else {
+        console.log('here2')
         this.lose()
+        
+        
       }
     }
   }
@@ -83,39 +112,38 @@ class App extends React.Component {
   checkCount() {
     const counto = this.state.player.count
     const dealo = this.state.dealer.count
-    let acesPlayer = this.state.acePlayer
-    let acesDealer = this.state.aceDeal
+    
     
    console.log(this.state)
 
   
 
-    if (counto>21 && acesPlayer > 0) {
+    // if (counto>21 && acesPlayer > 0) {
      
-      this.setState(prevState => {
-        let player = Object.assign({}, prevState.player);  // creating copy of state variable dealer
-        player.count = counto -10
-        player.acePlayer = acesPlayer - 1                  // update the count property, assign a new value                 
-        return { player };                                 // return new object dealer object
-          },()=>{
-        this.checkCount()
+    //   this.setState(prevState => {
+    //     let player = Object.assign({}, prevState.player);  // creating copy of state variable dealer
+    //     player.count = counto -10
+    //                     // update the count property, assign a new value                 
+    //     return { player ,acePlayer: acesPlayer - 1};                                 // return new object dealer object
+    //       },()=>{
+    //     this.checkCount()
         
-        })
-    }
-    if (dealo>21 && acesDealer > 0) {
+    //     })
+    // }
+    // if (dealo>21 && acesDealer > 0) {
       
-      this.setState(prevState => {
-        let dealer = Object.assign({}, prevState.dealer);  // creating copy of state variable dealer
-        dealer.count = dealo -10
-        dealer.aceDeal = acesDealer - 1                  // update the count property, assign a new value                 
-        return { dealer };                                 // return new object dealer object
-          },()=>{
-        this.checkCount()
+    //   this.setState(prevState => {
+    //     let dealer = Object.assign({}, prevState.dealer);  // creating copy of state variable dealer
+    //     dealer.count = dealo -10
+    //                     // update the count property, assign a new value                 
+    //     return { dealer ,aceDeal: acesDealer - 1};                                 // return new object dealer object
+    //       },()=>{
+    //     this.checkCount()
         
-        })
+    //     })
     
-    }
-    if (counto > 21 ) {
+    // }
+    if (counto > 21) {
       this.lose()
     } else if (dealo > 21) {
       this.win()
@@ -228,16 +256,18 @@ class App extends React.Component {
     const dealerCard1 = this.generateCard(playerCard1.newDeck);
     const playerCard2 = this.generateCard(dealerCard1.newDeck); 
     const dealerCard2 = this.generateCard(playerCard2.newDeck)   
-    const player = {cards: [playerCard1.randomCard, playerCard2.randomCard], count: this.generateCount(playerCard1.randomCard) + this.generateCount(playerCard2.randomCard), altcount: ""}
-    const dealer = {cards: [dealerCard1.randomCard, dealerCard2.randomCard], count: this.generateCount(dealerCard1.randomCard) + this.generateCount(dealerCard2.randomCard), altcount: ""}
+    let player = {cards: [playerCard1.randomCard, playerCard2.randomCard], count: this.generateCount(playerCard1.randomCard) + this.generateCount(playerCard2.randomCard), altcount: ""}
+    let dealer = {cards: [dealerCard1.randomCard, dealerCard2.randomCard], count: this.generateCount(dealerCard1.randomCard) + this.generateCount(dealerCard2.randomCard), altcount: ""}
+
+   
    
     return {newDeck :dealerCard2.newDeck, player, dealer}
     
   }
 
   generateDeck() {
-    // const cards = [2,3,4,5,6,7,8,9,10,'J','Q','K','A'];
-     const cards = [2,3,'A'];
+    const cards = [2,3,4,5,6,7,8,9,10,'J','Q','K','A'];
+    //  const cards = [2,3,'A'];
     const suits = ['♦','♣','♥','♠'];
     const deck = [];
     for (let i = 0; i < cards.length; i++) {
@@ -284,7 +314,7 @@ class App extends React.Component {
 
     if (this.state.val > this.state.cash){
       this.setState({
-        message: "nope nibba",
+        message: "You need more cash",
         bet: "0"
       })
     }  else if (typeof this.state.val === 'number'){
@@ -298,11 +328,11 @@ class App extends React.Component {
     }else {
       this.setState({
         hand:"block",
-        betTemp: this.state.val,
-        aceDeal: this.checkAce(this.state.dealer.cards),
-        acePlayer: this.checkAce(this.state.player.cards)
+        betTemp: this.state.val
       },this.checkBJ())
     }  
+
+    this.stupidAces()
     
   }
 
@@ -312,14 +342,19 @@ class App extends React.Component {
     } else {
       const cardo = this.generateCard(this.state.deck)
       const newPlayer = this.state.player.cards
-      const counto = this.state.player.count
+      var countio = this.state.player.count
       newPlayer.push(cardo.randomCard)
+      if (cardo.randomCard.number === 'A' && countio > 10){
+        countio = countio - 10
+        
+      }
+      
 
     this.setState(prevState => {
       let player = Object.assign({}, prevState.player);  // creating copy of state variable jasper
-      player.count = counto + this.generateCount(cardo.randomCard)
+      player.count = countio + this.generateCount(cardo.randomCard)
       player.cards = newPlayer                    // update the name property, assign a new value                 
-      return { player , deck:cardo.newDeck, betTemp: this.state.bet, acePlayer: this.checkAce(newPlayer)};                                 // return new object jasper object
+      return { player , deck:cardo.newDeck, betTemp: this.state.bet};                                 // return new object jasper object
     },this.checkCount)
 
     }
