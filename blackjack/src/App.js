@@ -63,15 +63,15 @@ class App extends React.Component {
     }
   }
   dealerHit() {
-    const dealo = this.state.dealer.count
+    let dealo = this.state.dealer.count
     let counto = this.state.player.count
     if (dealo < 17 && counto <= 21) {
       const cardo = this.generateCard(this.state.deck)
       const newDealer = this.state.dealer.cards
       
       newDealer.push(cardo.randomCard)
-      if (cardo.number === 'A' && counto > 11) {
-        counto = counto - 10
+      if (cardo.number === 'A' && dealo > 11) {
+        dealo = dealo - 10
       }
       this.setState(prevState => {
       let dealer = Object.assign({}, prevState.dealer);  // creating copy of state variable dealer
@@ -271,8 +271,8 @@ class App extends React.Component {
   }
 
   generateDeck() {
-    const cards = [2,3,4,5,6,7,8,9,10,'J','Q','K','A'];
-    //  const cards = [2,3,'A'];
+    // const cards = [2,3,4,5,6,7,8,9,10,'J','Q','K','A'];
+     const cards = [2,3,'A'];
     const suits = ['♦','♣','♥','♠'];
     const deck = [];
     for (let i = 0; i < cards.length; i++) {
@@ -356,6 +356,7 @@ class App extends React.Component {
         countio = countio - 10
         
       }
+      console.log(cardo.randomCard.number)
       
 
     this.setState(prevState => {
