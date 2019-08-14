@@ -18,7 +18,8 @@ class App extends React.Component {
       deck: [],
       cards: [],
       dealerD: 'none',
-      dealerD1: 'none'
+      dealerD1: 'none',
+      color: 'black'
     }
     this.start = this.start.bind(this)
     this.bet5 = this.bet5.bind(this)
@@ -42,6 +43,7 @@ class App extends React.Component {
     this.checkAce = this.checkAce.bind(this)
     this.stupidAces = this.stupidAces.bind(this)
   }
+ 
 
   stupidAces(){
     if (this.state.player.cards[0].number === 'A' && this.state.player.cards[1].number === 'A') {
@@ -356,6 +358,8 @@ class App extends React.Component {
         countio = countio - 10
         
       }
+
+    
     
       
 
@@ -432,9 +436,14 @@ class App extends React.Component {
           <div className = "words">YOUR HAND {"     "} {this.state.player.count}
           </div>
               {this.state.player.cards.map((card)=>{
+                let color = 'black'
+                
+                  if (card.suit === '♦' || card.suit === '♥') {
+                    color = 'red'
+                  }
                 return <div className="card-small">
-                <p className="card-text">{card.number}</p>
-                <p className="card-img ">{card.suit}</p>
+                <p style = {{color: color}}className="card-text">{card.number}</p>
+                <p style = {{color: color}}className="card-img ">{card.suit}</p>
               </div>
 
               })}
@@ -446,18 +455,28 @@ class App extends React.Component {
               {this.state.dealer.count}
               </div>
           </div>
+            
               <div style = {{display: this.state.dealerD1}} className="card-small">
-                <p  className="card-text">{this.state.dealer.cards[0].number}</p>
-                <p className="card-img ">{this.state.dealer.cards[0].suit}</p>
+              <div style = {{display: 'none'}}>
+              {this.state.dealer.cards[0].suit === ('♦' || '♥')? this.state.color ='red' : this.state.color ='black' }
+              </div>
+              
+                <p  style = {{color: this.state.color}}className="card-text">{this.state.dealer.cards[0].number}</p>
+                <p style = {{color: this.state.color}}className="card-img ">{this.state.dealer.cards[0].suit}</p>
               </div>
               <div style = {{display: this.state.dealerD1}}className="card-small">
                 <p  className="card-text"></p>
                 <p className="card-img "></p>
               </div>
           {this.state.dealer.cards.map((card)=>{
+            let color = 'black'
+            ['♦','♣','♥','♠']
+              if (card.suit === '♦' || card.suit === '♥') {
+                color = 'red'
+              }
                 return <div style = {{display:this.state.dealerD}} className="card-small">
-                <p  className="card-text">{card.number}</p>
-                <p className="card-img ">{card.suit}</p>
+                <p  style = {{color: color}}className="card-text">{card.number}</p>
+                <p style = {{color: color}}className="card-img ">{card.suit}</p>
               </div>
 
               })}          
